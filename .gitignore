@@ -1,5 +1,5 @@
 # Dependências do Node.js
-node_modules/
+node_modules
 
 # Arquivos de variáveis de ambiente (Senhas e Configurações)
 .env
