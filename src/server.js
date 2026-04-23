@@ -1,22 +1,46 @@
 // src/server.js
 
-// 1. Importando as ferramentas necessárias
+// Importando as ferramentas
 const express = require('express');
 const path = require('path');
+const fs = require('fs'); // Módulo nativo do Node para ler arquivos
 
-// 2. Iniciando o aplicativo Express
 const app = express();
 const PORT = 4000;
 
-// 3. Configurando o servidor para entregar os arquivos do Front-end
-// O express.static diz ao servidor: "Tudo que estiver na pasta 'public', pode ser acessado pelo navegador"
+// Configurações do servidor
 const publicDirectoryPath = path.join(__dirname, '../public');
 app.use(express.static(publicDirectoryPath));
+app.use(express.json()); // Permite que o servidor entenda o JSON que vem do Front-end
 
-// 4. Configurando para aceitar dados no formato JSON (útil para o login depois)
-app.use(express.json());
+// ROTA DE LOGIN
+app.post('/api/login', (req, res) => {
+    //Pega os dados que o usuário digitou no navegador
+    const { email, senha } = req.body;
 
-// 5. Ligando o servidor na porta 3000
+    // Diz onde está o banco de dados (Usado arquivo JSON para o MVP)
+    const caminhoArquivo = path.join(__dirname, 'data', 'users.json');
+
+    // Ler o arquivo e transformar o texto em JavaScript
+    const dadosBrutos = fs.readFileSync(caminhoArquivo, 'utf-8');
+    const usuarios = JSON.parse(dadosBrutos);
+
+    // Procura se existe alguém com esse email e senha
+    const usuarioEncontrado = usuarios.find(
+        (user) => user.email === email && user.senha === senha
+    );
+
+    // Da a resposta para o Front-end
+    if (usuarioEncontrado) {
+        // Se achou, devolve sucesso (Status 200)
+        res.status(200).json({ mensagem: 'Login aprovado!', nome: usuarioEncontrado.nome });
+    } else {
+        // Se não achou, devolve erro (Status 401 - Não Autorizado)
+        res.status(401).json({ erro: 'E-mail ou senha incorretos!' });
+    }
+});
+
+// Ligando o servidor
 app.listen(PORT, () => {
     console.log(`Servidor do Terê Verde Online rodando na porta ${PORT}!`);
     console.log(`Acesse: http://localhost:${PORT}`);
