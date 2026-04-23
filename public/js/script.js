@@ -44,4 +44,48 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // ==========================================
+    // LÓGICA DO PAINEL ADMINISTRATIVO (CADASTRAR EVENTO)
+    // ==========================================
+    const formEvento = document.getElementById('form-evento');
+
+    if (formEvento) {
+        formEvento.addEventListener('submit', async (evento) => {
+            evento.preventDefault(); // Impede a página de recarregar
+
+            // O FormData é um "pacote" especial do JS para enviar arquivos
+            const pacoteDeDados = new FormData();
+            
+            // Adiciona os textos ao pacote
+            pacoteDeDados.append('titulo', document.getElementById('titulo-evento').value);
+            pacoteDeDados.append('data', document.getElementById('data-evento').value);
+            pacoteDeDados.append('descricao', document.getElementById('desc-evento').value);
+            
+            // Adiciona o arquivo de imagem ao pacote (pega o primeiro arquivo selecionado)
+            const campoImagem = document.getElementById('img-evento');
+            pacoteDeDados.append('imagem', campoImagem.files[0]);
+
+            try {
+                // Envia para o Back-end
+                const respostaServidor = await fetch('/api/eventos', {
+                    method: 'POST',
+                    body: pacoteDeDados 
+                    // Nota: Quando se usa o FormData, não precisa colocar o 'headers', 
+                    // o navegador faz isso automaticamente.
+                });
+
+                const dados = await respostaServidor.json();
+
+                if (respostaServidor.ok) {
+                    alert(dados.mensagem); // Mostra a mensagem do teste
+                } else {
+                    alert('Erro ao processar o teste.');
+                }
+            } catch (erro) {
+                console.error('Erro de conexão:', erro);
+            }
+        });
+    }
+
 });
